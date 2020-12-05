@@ -21,15 +21,9 @@ def get_abundance_values(names,paths):
     dfs = []
     for name,path in zip(names,paths):
         data = pd.read_csv(path, index_col=False, sep=';').iloc[:,1:]
-
         total = sum(data['reads_in_cluster'])
-        rel_abundance=[]
-
-        for index,row in data.iterrows():
-            rel_abundance.append(row['reads_in_cluster'] / total)
-            
-        data['rel_abundance'] = rel_abundance
-        dfs.append(pd.DataFrame({'taxid': data['taxid'], 'rel_abundance': rel_abundance}))
+        data['rel_abundance']=data.apply(lambda row: row['reads_in_cluster'] / total,axis=1)
+        dfs.append(data[ ['taxid','rel_abundance']].dropna(subset=['taxid']))
         data.to_csv("" + name + "_nanoclust_out.txt")
 
     return dfs
